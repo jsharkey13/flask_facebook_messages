@@ -1,0 +1,48 @@
+{% from 'macros.html' import thread_initials %}
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}" />
+    <title>Facebook Message Export</title>
+</head>
+<body>
+    <!-- Header Bar -->
+    <div class="header filler"></div>
+    <div class="header scroll">
+        <a href="/" class="header-home">Facebook Message Export</a>
+        <div class="page-title">
+            <div>
+                    <a href="/" class="thread-name">All Message Threads</a>
+                <span class="thread-message-count">({{chat|length}} threads, {{chat._total_messages}} messages)</span>
+            </div>
+        </div>
+        <div class="header-search">
+            <form class="header-search" action="{{url_for('search')}}" method=post>
+                <input type="text" name="search_thread" value="" style="display: none"></input>
+                    <input type="text" class="header-search-box" name="search_str" value="{{search_str}}"><input type="submit" class="header-search-button" value="Submit">
+                <div>
+                    <input style="display: none" type="radio" name="search_scope" id="search-scope-thread" value="THREAD"/><label style="display: none" for="search-scope-thread">This Thread</label>
+                    <input type="radio" name="search_scope" id="search-scope-chat" value="CHAT" checked/><label for="search-scope-chat">All Messages</label>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Content -->
+    <div class='home-thread-container'>
+    {% for thread in chat.threads %}
+        <div class='home-thread'>
+            <div class="home-initial-box">{{thread_initials(thread.people_str)}}</div>
+            <div class="home-thread-name-box">
+                {% if thread.people_str.split(", ")|length <= 4 %}
+                    <a href="{{url_for('thread', username=thread.people_str)}}" class="thread-name">{{thread.people_str}}</a>
+                {% else %}
+                    <a href="{{url_for('thread', username=thread.people_str)}}" class="thread-name" title="{{thread.people_str}}">
+                        {{thread.people_str.split(", ")[0:3]|join(', ')}} & {{thread.people_str.split(", ")|length - 3}} others
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</body>
+</html>

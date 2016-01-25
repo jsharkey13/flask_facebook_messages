@@ -1,0 +1,85 @@
+<!--  -->
+<!-- Used on the homepage: -->
+<!--  -->
+
+{% macro thread_initials(name) -%}
+    {%- if name.split(", ")|length == 1 -%}
+        {%- for n in name.split(", ")[0].replace("-", " ").split(" ") -%}
+            {{n[0]}}
+        {%- endfor -%}
+    {%- else -%}
+        {{name.split(", ")|length}}
+    {%- endif -%}
+{%- endmacro -%}
+
+<!--  -->
+<!-- Used on the thread and search pages: -->
+<!--  -->
+
+<!-- Version 1; used in thread.html -->
+{% macro author_name1(name) -%}
+    <a href="{{url_for('thread', username=name)}}" class="message-author">{{name}}</a>
+{%- endmacro -%}
+
+{%- macro message_class1(this_auth) -%}
+    {{'other ' if this_auth != _myname}}
+{%- endmacro -%}
+
+<!-- Version 2; used in thread2.html -->
+{% macro author_name2(name) -%}
+    <a href="{{url_for('thread', username=name)}}" class="message-author">{{name}}</a>
+{%- endmacro -%}
+
+{%- macro message_class2(first, last, this_auth, prev_auth, next_auth) -%}
+    {{'other ' if this_auth != _myname}}
+    {%- if (prev_auth == this_auth) and (next_auth == this_auth) and not (first or last) -%}
+    middle
+    {%- elif (next_auth == this_auth) and not last and ((prev_auth != this_auth) or first) -%}
+    first
+    {%- elif (prev_auth == this_auth) and not first and ((next_auth != this_auth) or last) -%}
+    last
+    {%- else -%}
+    single
+    {%- endif -%}
+{%- endmacro -%}
+
+<!-- Version 3; used in thread3.html and search pages. -->
+{% macro author_name3(name) -%}
+    {%- if name in chat._thread_dict -%}
+        <a href="{{url_for('thread', username=name)}}" class="message-author">{{name}}</a>
+    {%- else -%}
+        <span class="message-author">{{name}}</span>
+    {%- endif -%}
+{%- endmacro -%}
+
+{%- macro message_class3(first, last, this_message, prev_message, next_message) -%}
+    {% set this_auth = this_message.author %}{% set prev_auth = prev_message.author %}{% set next_auth = next_message.author -%}
+    {% set dtT = this_message.date_time -%}{% set dtP = prev_message.date_time -%}{% set dtN = next_message.date_time -%}
+
+    {{'other ' if this_auth != _myname}}
+    {%- if (prev_auth == this_auth) and (next_auth == this_auth) and not (first or last) -%}
+        {% if (dtT - dtP <= dt) and (dtN - dtT <= dt) -%}
+            middle
+        {%- elif (dtT - dtP > dt) and (dtN - dtT <= dt) -%}
+            first
+        {%- elif (dtN - dtT > dt) and (dtT - dtP <= dt) -%}
+            last
+        {%- else -%}
+            single
+        {%- endif -%}
+    {%- elif (not last) and (next_auth == this_auth) and ((prev_auth != this_auth) or first) -%}
+        {%- if (dtN - dtT <= dt) -%}
+            first
+        {%- else -%}
+            single
+        {%- endif -%}
+    {%- elif (not first) and (prev_auth == this_auth) and ((next_auth != this_auth) or last) -%}
+        {%- if (dtT - dtP <= dt) -%}
+            last
+        {%- else -%}
+            single
+        {%- endif -%}
+    {%- else -%}
+        single
+    {%- endif -%}
+{%- endmacro -%}

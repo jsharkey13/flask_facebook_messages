@@ -1,0 +1,58 @@
+{% from 'macros.html' import author_name3 as author_name with context %}
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}" />
+    <title>All Messages - Search</title>
+</head>
+<body>
+    <!-- Header Bar -->
+    <div class="header filler"></div>
+    <div class="header scroll">
+        <a href="/" class="header-home">Facebook Message Export</a>
+        <div class="page-title">
+            <div>
+                <a href="/" class="thread-name">All Messages</a>
+                <span class="thread-message-count">({{messages|length}} results)</span>
+            </div>
+        </div>
+        <div class="header-search">
+            <form class="header-search" action="{{url_for('search')}}" method=post>
+                <input type="hidden" name="search_thread" value=""></input>
+                <input type="text" class="header-search-box" name="search_str" value="{{search_str}}"><input type="submit" class="header-search-button" value="Submit">
+                <div>
+                    <input style="display: none" type="radio" name="search_scope" id="search-scope-thread" value="THREAD"/><label style="display: none" for="search-scope-thread">This Thread</label>
+                    <input type="radio" name="search_scope" id="search-scope-chat" value="CHAT" checked/><label for="search-scope-chat">All Messages</label>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Content -->
+    <div class="thread-container">
+        <div style="height: 15px"></div>
+        {% for message in messages %}
+            {%- if loop.first or message.thread_name != messages[loop.index0 - 1].thread_name -%}
+            <div class="search-split-threads">Messages with <a href="{{url_for('thread', username=message.thread_name)}}" class="search-split-threads">{{message.thread_name}}</a>:</div>
+            {%- endif -%}
+            <div class="message search-result" title="{{message.date_time|datetime(True)}}">
+                <div class="message-header">
+                    <div class="message-author">{{author_name(message.author)}}</div>
+                    <div class="message-date">{{message.date_time|datetime}}</div>
+                </div>
+                <div class="message-body">
+                    {% for line in message.text.split("<|NEWLINE|>") -%}
+                        {% for part in line.split(search_str) -%}
+                            {{part}}{%- if not loop.last -%}<span class="search-string">{{search_str}}</span>{%- endif -%}
+                        {%- endfor -%}<br>
+                    {%- endfor %}
+                </div>
+            </div>
+            {% if loop.last %}
+                <div class="thread-container-footer">
+                    There {{'were' if messages|length > 1 else 'was'}} {{messages|length}} result{{'' if messages|length == 1 else 's'}} from {{total_messages}} message{{'' if total_messages == 1 else 's'}}.
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</body>
+</html>

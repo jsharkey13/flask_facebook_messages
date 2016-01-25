@@ -1,0 +1,60 @@
+<!-- This version also groups messages by the same author together, but now only if they are within 'dt' of one another! -->
+{% from 'macros.html' import author_name3 as author_name with context %}
+{% from 'macros.html' import message_class3 as message_class with context %}
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}" />
+    <title>{{thread.people_str}} - Messages</title>
+</head>
+<body>
+    <!-- Header Bar -->
+    <div class="header filler"></div>
+    <div class="header scroll">
+        <a href="/" class="header-home">Facebook Message Export</a>
+        <div class="page-title">
+            <div>
+                {% if thread.people_str.split(", ")|length <= 4 %}
+                    <a href="{{url_for('thread', username=thread.people_str)}}" class="thread-name">{{thread.people_str}}</a>
+                {% else %}
+                    <a href="{{url_for('thread', username=thread.people_str)}}" class="thread-name" title="{{thread.people_str}}">
+                        {{thread.people_str.split(", ")[0:4]|join(', ')}} & {{thread.people_str.split(", ")|length - 4}} others
+                    </a>
+                {% endif %}
+                <span class="thread-message-count">({{thread|length}} messages)</span>
+            </div>
+        </div>
+        <div class="header-search">
+            <form class="header-search" action="{{url_for('search')}}" method=post>
+                <input type="hidden" name="search_thread" value="{{thread.people_str}}"></input>
+                <input type="text" class="header-search-box" name="search_str"><input type="submit" class="header-search-button">
+                <div>
+                    <input type="radio" name="search_scope" id="search-scope-thread" value="THREAD" checked/><label for="search-scope-thread">This Thread</label>
+                    <input type="radio" name="search_scope" id="search-scope-chat" value="CHAT" /><label for="search-scope-chat">All Messages</label>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Content -->
+    <div class="thread-container">
+        <div style="height: 15px"></div>
+        {% for message in thread.messages %}
+            {% set message_type = message_class(loop.first, loop.last, message, thread.messages[loop.index0 - 1], thread.messages[loop.index0 + 1] if not loop.last else None) %}
+            <div class="message {{message_type}}" title="{{message.date_time|datetime(True)}}">
+                <div class="message-header {{message_type}}">
+                    <div class="message-author {{message_type}}">{{author_name(message.author)}}</div>
+                    <div class="message-date {{message_type}}">{{message.date_time|datetime}}</div>
+                </div>
+                <div class="message-body">
+                    {% for line in message.text.split("<|NEWLINE|>") -%}
+                        {{line}}<br>
+                    {%- endfor %}
+                </div>
+            </div>
+            {% if loop.last %}
+                <div class="thread-container-footer">The last message was {{'sent' if message.author == _myname else 'recieved'}} on {{message.date_time|datetime(True)}}</div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</body>
+</html>
