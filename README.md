@@ -2,9 +2,11 @@
 A simple server to view exported Facebook messages in a browser. Based on [Facebook Message Parser](https://github.com/jsharkey13/facebook_message_parser), adds a more reasonable user interface to the Python format.
 
 #### Running the Code
-The Python is all contained in `server.py` and can be run simply using `python server.py`. It will attempt to load in an export created by the [Facebook Message Parser](https://github.com/jsharkey13/facebook_message_parser) saved to `messages.pickle`; if this doesn't exist, creating it needs to be Step 1. See that repository for more instructions; but put the `messages.pickle` file created using `dump_to_pickle()` in the server directory with `fb_chat.py`.
+The Python is all contained in `server.py` and can be run simply using `python server.py`. It will attempt to load in an export created by the [Facebook Message Parser](https://github.com/jsharkey13/facebook_message_parser) saved to `messages.pickle`; if this doesn't exist, creating it needs to be Step 1. See that repository for more instructions; but put the `messages.pickle` file created by adding the line `Facebook.dump_to_pickle()` to the end of `facebook.py` in the server directory along with `fb_chat.py`.
 
 After that, run the server and open up a browser to `http://localhost:5000`. That's it!
+
+It's only been properly tested in Chrome (or rather, Chrome is the only browser I attempted to make it work in), and large conversations may kill the server, since it loads them into memory to create the HTML page before sending it to the browser.
 
 #### Dependencies
 The code is written in Python 2.7
